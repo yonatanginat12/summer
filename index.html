@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Five ways to make money this summer</title>
+<meta name="description" content="Real numbers on five ways to earn money over summer vacation in Israel, at 13. What each one actually pays, how long it takes, and what is annoying about it.">
+<meta name="theme-color" content="#0E0B14">
+<meta property="og:title" content="Five ways to make money this summer">
+<meta property="og:description" content="Real numbers, not advice. What each one actually pays and what is annoying about it.">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Hanken+Grotesk:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --base:#0E0B14; --surface:#1A1526; --raised:#241D33;
+  --text:#F4F1EC; --dim:#A79FB8;
+  --lav:#B69CFF; --teal:#35E0D0; --mag:#FF5FA2;
+  --line:#332A47;
+  --accent:var(--lav);
+  --maxw:640px;
+  /* Neither webfont covers U+20AA, so the shekel sign must fall back cleanly */
+  --body-stack:"Hanken Grotesk",system-ui,-apple-system,"Segoe UI","Arial Hebrew","Helvetica Neue",Arial,sans-serif;
+  --display-stack:"Bricolage Grotesque",system-ui,-apple-system,"Segoe UI","Arial Hebrew","Helvetica Neue",Arial,sans-serif;
+}
+@media (prefers-color-scheme: light){
+  :root{
+    --base:#F7F5F0; --surface:#FFFFFF; --raised:#FFFFFF;
+    --text:#17121F; --dim:#5C5470;
+    --lav:#6B3FE0; --teal:#0F7A72; --mag:#C41F63;
+    --line:#E2DDD4;
+  }
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; background:var(--base); color:var(--text);
+  font-family:var(--body-stack);
+  font-size:17.5px; line-height:1.62;
+  font-variant-numeric:tabular-nums;
+  padding:0 20px calc(72px + env(safe-area-inset-bottom));
+  overflow-x:hidden;
+}
+.wrap{max-width:var(--maxw);margin:0 auto}
+h1,h2,h3{font-family:var(--display-stack);line-height:1.06;margin:0;letter-spacing:-.02em}
+h1{font-size:clamp(38px,10.5vw,58px);font-weight:800}
+h2{font-size:clamp(27px,7vw,36px);font-weight:800;letter-spacing:-.025em}
+h3{font-size:21px;font-weight:600;letter-spacing:-.01em;line-height:1.2}
+p{margin:0 0 15px}
+a{color:var(--accent);text-decoration-thickness:1px;text-underline-offset:3px}
+.eyebrow{
+  font-size:11.5px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;
+  color:var(--dim);margin:0 0 14px
+}
+.dim{color:var(--dim)}
+.small{font-size:15px;line-height:1.55}
+
+/* hero */
+header{padding:72px 0 8px}
+.sub{font-size:19px;color:var(--dim);margin-top:20px;max-width:30ch}
+.meta{font-size:14px;color:var(--dim);margin-top:26px;padding-top:18px;border-top:1px solid var(--line)}
+
+/* big number */
+.bignum{margin:52px 0 0;padding:30px 24px;background:var(--surface);border:1px solid var(--line);border-radius:20px;border-left:3px solid var(--teal)}
+.bignum .n{font-family:var(--display-stack);font-size:clamp(48px,15vw,76px);font-weight:800;color:var(--teal);line-height:.95;letter-spacing:-.04em}
+.bignum .cap{font-size:16px;color:var(--dim);margin-top:14px}
+
+section{margin-top:64px}
+
+/* matcher */
+.q{margin-bottom:26px}
+.q .qt{font-size:16.5px;font-weight:600;margin-bottom:11px}
+.opts{display:flex;flex-wrap:wrap;gap:8px}
+.opt{
+  min-height:44px;padding:10px 16px;border-radius:12px;
+  background:var(--surface);border:1px solid var(--line);color:var(--text);
+  font-family:inherit;font-size:15.5px;cursor:pointer;
+  transition:border-color .15s,background .15s,color .15s
+}
+.opt[aria-pressed="true"]{border-color:var(--accent);color:var(--accent);background:var(--raised)}
+.btn{
+  width:100%;min-height:52px;margin-top:8px;border-radius:14px;border:none;
+  background:var(--accent);color:var(--base);font-family:var(--display-stack);
+  font-size:17px;font-weight:700;cursor:pointer
+}
+.btn[disabled]{opacity:.35;cursor:default}
+
+/* result card, sized to be screenshotted */
+#result{margin-top:22px}
+.rcard{
+  background:var(--surface);border:1px solid var(--line);border-radius:20px;
+  padding:26px 22px;border-top:3px solid var(--accent)
+}
+.rcard .rl{font-size:11.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--dim);font-weight:700}
+.rcard h3{margin:12px 0 8px;font-size:25px}
+.rrow{display:flex;gap:14px;margin-top:16px;padding-top:16px;border-top:1px solid var(--line)}
+.rrow div{flex:1}
+.rrow .k{font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);font-weight:700}
+.rrow .v{font-family:var(--display-stack);font-size:19px;font-weight:700;margin-top:3px}
+.runner{margin-top:16px;font-size:14.5px;color:var(--dim)}
+
+/* option cards */
+.card{
+  background:var(--surface);border:1px solid var(--line);border-radius:20px;
+  padding:26px 22px;margin-top:20px;border-top:3px solid var(--ac,var(--lav))
+}
+.card .rank{font-family:var(--display-stack);font-size:13px;font-weight:800;color:var(--ac,var(--lav));letter-spacing:.06em}
+.card h3{margin:8px 0 12px}
+.stats{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0}
+.stat{flex:1 1 30%;min-width:92px;background:var(--raised);border-radius:12px;padding:12px 13px}
+.stat .k{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--dim);font-weight:700}
+.stat .v{font-family:var(--display-stack);font-size:17px;font-weight:700;margin-top:4px;line-height:1.15}
+.catch{border-left:2px solid var(--ac,var(--lav));padding:2px 0 2px 14px;margin:18px 0;font-size:16px}
+.catch b{font-family:var(--display-stack);font-weight:700}
+
+/* accordion */
+details{margin-top:14px;border-top:1px solid var(--line);padding-top:14px}
+summary{
+  list-style:none;cursor:pointer;min-height:44px;display:flex;align-items:center;gap:10px;
+  font-weight:600;font-size:16px;color:var(--ac,var(--lav))
+}
+summary::-webkit-details-marker{display:none}
+summary::before{content:"";width:8px;height:8px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(45deg);transition:transform .2s;flex:none;margin-bottom:3px}
+details[open] summary::before{transform:rotate(-135deg);margin-bottom:0}
+.dbody{padding-top:6px}
+ul{margin:0 0 14px;padding-left:20px}
+li{margin-bottom:7px}
+
+/* video */
+.vid{
+  display:block;position:relative;margin-top:12px;border-radius:14px;overflow:hidden;
+  background:var(--raised);border:1px solid var(--line);text-decoration:none;color:inherit
+}
+.vid img{width:100%;display:block;aspect-ratio:16/9;object-fit:cover;background:var(--raised)}
+.vid .play{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:54px;height:54px;border-radius:50%;background:rgba(14,11,20,.72);display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.vid .play::after{content:"";border-left:15px solid #fff;border-top:9px solid transparent;border-bottom:9px solid transparent;margin-left:4px}
+.vid .vt{padding:12px 14px;font-size:15px;font-weight:600;line-height:1.3}
+.vid .vm{padding:0 14px 13px;font-size:13px;color:var(--dim)}
+.vid iframe{width:100%;aspect-ratio:16/9;display:block;border:0}
+
+/* links */
+.lk{display:flex;align-items:center;gap:10px;min-height:44px;padding:11px 14px;margin-top:8px;background:var(--raised);border:1px solid var(--line);border-radius:12px;text-decoration:none;color:var(--text);font-size:15.5px}
+.lk .ar{margin-left:auto;color:var(--dim);flex:none}
+.lk .px{font-family:var(--display-stack);font-weight:700;color:var(--ac,var(--lav));flex:none}
+
+/* table */
+.tbl{width:100%;border-collapse:collapse;margin:16px 0;font-size:15.5px}
+.tbl th{text-align:left;font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--dim);font-weight:700;padding:0 0 9px;border-bottom:1px solid var(--line)}
+.tbl td{padding:11px 0;border-bottom:1px solid var(--line);vertical-align:top}
+.tbl td:last-child{text-align:right;font-family:var(--display-stack);font-weight:700;white-space:nowrap;padding-left:12px}
+
+.warn{background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--mag);border-radius:16px;padding:24px 22px;margin-top:20px}
+.warn h3{color:var(--mag);margin-bottom:12px}
+
+footer{margin-top:72px;padding-top:26px;border-top:1px solid var(--line);font-size:14.5px;color:var(--dim)}
+
+@media (prefers-reduced-motion:no-preference){
+  .reveal{animation:rise linear both;animation-timeline:view();animation-range:entry 0% entry 42%}
+  @keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <p class="eyebrow">Summer 2026</p>
+  <h1>Five ways to<br>make money<br>this summer</h1>
+  <p class="sub">Actual numbers for each one, including the parts that are annoying.</p>
+  <p class="meta">About 8 minutes. Everything here was checked in July 2026 against real listings, real prices and Israeli law.</p>
+</header>
+
+<div class="bignum reveal">
+  <div class="n">₪420</div>
+  <div class="cap">A month, for one hour of work per week. That is three neighbourhood kids paying ₪35 each for an hour of playing games in English, once a week. It costs you nothing to start.</div>
+</div>
+
+<section class="reveal">
+  <p class="eyebrow">Why that one is first</p>
+  <h2>You have something scarce here</h2>
+  <p>English is your first language. In Israel that is unusual, and parents pay for it. In April 2026 the national testing authority found that <b>only 22% of ninth graders</b> meet the Education Ministry's English requirements, and Israeli families already spend ₪6,000–12,000 a year on private English tutors.</p>
+  <p>Here is the part that matters. On Superprof, an Israeli tutoring site, the average tutor charges ₪108 an hour. Native English speakers on the same site charge ₪110. So being a native speaker is worth about ₪2 an hour <em>if you compete with adult tutors</em>.</p>
+  <p>You should not compete with them. A seven-year-old will talk to you and go quiet in front of a certified adult teacher. That is the whole business. You are not selling lessons, you are selling an hour a small child actually enjoys, and nobody else is selling it.</p>
+</section>
+
+<section class="reveal">
+  <p class="eyebrow">Pick one</p>
+  <h2>Which one fits you</h2>
+  <p class="small dim">Four taps. It uses what you pick, not a random answer.</p>
+
+  <div id="quiz">
+    <div class="q" data-k="home">
+      <div class="qt">Do you want to deal with people face to face?</div>
+      <div class="opts">
+        <button class="opt" data-v="out">Sure</button>
+        <button class="opt" data-v="in">I'd rather not</button>
+      </div>
+    </div>
+    <div class="q" data-k="time">
+      <div class="qt">How much time per week?</div>
+      <div class="opts">
+        <button class="opt" data-v="low">About an hour</button>
+        <button class="opt" data-v="mid">A few hours</button>
+        <button class="opt" data-v="high">As much as it takes</button>
+      </div>
+    </div>
+    <div class="q" data-k="speed">
+      <div class="qt">When do you want the first payment?</div>
+      <div class="opts">
+        <button class="opt" data-v="now">This week</button>
+        <button class="opt" data-v="soon">A few weeks is fine</button>
+        <button class="opt" data-v="later">I can wait months</button>
+      </div>
+    </div>
+    <div class="q" data-k="kids">
+      <div class="qt">Little kids: fine, or no?</div>
+      <div class="opts">
+        <button class="opt" data-v="yes">Fine</button>
+        <button class="opt" data-v="no">No</button>
+      </div>
+    </div>
+    <button class="btn" id="go" disabled>Show my match</button>
+  </div>
+  <div id="result" hidden></div>
+</section>
+
+<section class="reveal">
+  <p class="eyebrow">The five</p>
+  <h2>What each one really pays</h2>
+</section>
+
+<!-- 1 -->
+<article class="card reveal" style="--ac:var(--teal)">
+  <div class="rank">01</div>
+  <h3>An hour of games in English</h3>
+  <p>You run one hour a week for two or three kids aged six to ten. You play games, read a picture book out loud, argue about a YouTube video. Everything is in English. It is not a lesson and you should never call it one.</p>
+  <div class="stats">
+    <div class="stat"><div class="k">Per child</div><div class="v">₪30–45</div></div>
+    <div class="stat"><div class="k">Per hour</div><div class="v">₪90–135</div></div>
+    <div class="stat"><div class="k">First paid</div><div class="v">1–2 weeks</div></div>
+  </div>
+  <p class="catch"><b>The catch.</b> Small children are exhausting and an hour is longer than it sounds. If you turn up with nothing planned it falls apart in ten minutes, and parents talk to each other. Plan three games, use two.</p>
+  <p class="small dim">For scale: babysitting at your age pays ₪25–40 an hour. A certified adult tutor charges ₪100–180. You sit in between, which is why it sells.</p>
+
+  <details>
+    <summary>Games that need nothing</summary>
+    <div class="dbody">
+      <p class="small">All free, no account, no printing.</p>
+      <a class="lk" href="https://games4esl.com/esl-classroom-games/" target="_blank" rel="noopener"><span>Games4esl — classroom games</span><span class="ar">→</span></a>
+      <a class="lk" href="https://games4esl.com/printables/" target="_blank" rel="noopener"><span>Games4esl — free printables</span><span class="ar">→</span></a>
+      <a class="lk" href="https://learnenglishkids.britishcouncil.org/games" target="_blank" rel="noopener"><span>British Council — 12 browser games</span><span class="ar">→</span></a>
+      <a class="lk" href="https://www.eslgamesplus.com/" target="_blank" rel="noopener"><span>ESL Games Plus — works on a tablet</span><span class="ar">→</span></a>
+      <div class="vid" data-yt="eGTBApvbbeM"><img loading="lazy" src="https://i.ytimg.com/vi/eGTBApvbbeM/hqdefault.jpg" alt=""><span class="play"></span><div class="vt">Top 10 Exciting ESL Games for kids</div><div class="vm">English Teaching Games · 5:10 · 2.4M views</div></div>
+      <div class="vid" data-yt="I9_32Vzg4qg"><img loading="lazy" src="https://i.ytimg.com/vi/I9_32Vzg4qg/hqdefault.jpg" alt=""><span class="play"></span><div class="vt">No-Prep ESL Warm-Up Games for Any Class</div><div class="vm">Teacher Val · 6:54 · 2025</div></div>
+      <div class="vid" data-yt="2znF4dVi8Sg"><img loading="lazy" src="https://i.ytimg.com/vi/2znF4dVi8Sg/hqdefault.jpg" alt=""><span class="play"></span><div class="vt">15 FUN Games for Kids — no supplies required</div><div class="vm">ShawnMHowell · 7:44 · 385K views</div></div>
+    </div>
+  </details>
+
+  <details>
+    <summary>How the first one happens</summary>
+    <div class="dbody">
+      <ul>
+        <li>Ask a parent to post once in the school parents' WhatsApp group. Coming from them it gets read; coming from you it gets scrolled past.</li>
+        <li>Say the age range, the day, the price per child, and that it is games and talking, not tutoring.</li>
+        <li>Start with two kids you already know. The first session is practice and you will be bad at it.</li>
+        <li>Take three or four families rather than one. Same money, and one family cancelling does not end everything.</li>
+      </ul>
+    </div>
+  </details>
+</article>
+
+<!-- 2 -->
+<article class="card reveal" style="--ac:var(--lav)">
+  <div class="rank">02</div>
+  <h3>Design commissions for people at school</h3>
+  <p>Custom profile pictures, Instagram highlight covers, small digital drawings. You already have a tablet and a stylus. Paid in cash or through a parent's Bit, the same day.</p>
+  <div class="stats">
+    <div class="stat"><div class="k">Per piece</div><div class="v">₪20–40</div></div>
+    <div class="stat"><div class="k">First paid</div><div class="v">Days</div></div>
+    <div class="stat"><div class="k">To start</div><div class="v">₪0</div></div>
+  </div>
+  <p class="catch"><b>The catch.</b> Friends expect free. Decide your price before anyone asks, say it out loud the first time, and do not do six free ones "to build a portfolio" — do two, then charge.</p>
+  <p class="small dim">On Fiverr the same highlight covers sell for $5–25, which is roughly ₪15–75 minus a 20% commission. Selling to people you already know pays better and you get the money immediately.</p>
+
+  <details>
+    <summary>Apps, including the free ones</summary>
+    <div class="dbody">
+      <p class="small">Procreate is ₪49.90 once. ibis Paint X is free and enough to start.</p>
+      <a class="lk" href="https://apps.apple.com/il/app/ibispaint-x/id450722833" target="_blank" rel="noopener"><span>ibis Paint X</span><span class="px">Free</span><span class="ar">→</span></a>
+      <a class="lk" href="https://www.photopea.com/" target="_blank" rel="noopener"><span>Photopea — browser, no account</span><span class="px">Free</span><span class="ar">→</span></a>
+      <a class="lk" href="https://apps.apple.com/il/app/procreate/id425073498" target="_blank" rel="noopener"><span>Procreate</span><span class="px">₪49.90</span><span class="ar">→</span></a>
+      <div class="vid" data-yt="DFIxPfWGx18"><img loading="lazy" src="https://i.ytimg.com/vi/DFIxPfWGx18/hqdefault.jpg" alt=""><span class="play"></span><div class="vt">I Tested Every FREE Drawing App</div><div class="vm">viyaura · 22:14 · 7.5M views</div></div>
+      <div class="vid" data-yt="fIekCpjaRek"><img loading="lazy" src="https://i.ytimg.com/vi/fIekCpjaRek/hqdefault.jpg" alt=""><span class="play"></span><div class="vt">How to make full face icons</div><div class="vm">dawnsdreamies · 13:23 · 570K views · 2026</div></div>
+      <div class="vid" data-yt="h34oL8HZ3T8"><img loading="lazy" src="https://i.ytimg.com/vi/h34oL8HZ3T8/hqdefault.jpg" alt=""><span class="play"></span><div class="vt">ibis Paint X — quick tutorial for beginners</div><div class="vm">KocoFruit · 14:17 · 2.9M views</div></div>
+    </div>
+  </details>
+</article>
+
+<!-- 3 -->
+<article class="card reveal" style="--ac:var(--mag)">
+  <div class="rank">03</div>
+  <h3>Editing Reels for a local business</h3>
+  <p>You already know CapCut. Small businesses near you need two or three Reels a week and mostly hate making them. One client covers the whole month.</p>
+  <div class="stats">
+    <div class="stat"><div class="k">Per Reel</div><div class="v">₪100–200</div></div>
+    <div class="stat"><div class="k">Per month</div><div class="v">₪200–400</div></div>
+    <div class="stat"><div class="k">First paid</div><div class="v">2–4 weeks</div></div>
+  </div>
+  <p class="catch"><b>The catch.</b> Most people will not reply. That is normal and not about you — expect an answer on the second or third message, not the first. A parent has to handle the money side, because businesses need a receipt.</p>
+  <p class="small dim">The same work on Fiverr pays about ₪31 a Reel after commission. Local pays roughly five times more for the identical file. Nail techs are the easiest people to ask because you know the world, but they have the smallest budgets — fitness trainers pay best, at ₪150–250 a Reel.</p>
+
+  <details>
+    <summary>The move that actually gets replies</summary>
+    <div class="dbody">
+      <ul>
+        <li>Pick three to five businesses near you that post badly.</li>
+        <li>Re-edit one of their existing posts without asking. Send it and say you made it, and you can do more.</li>
+        <li>This works because they see the thing instead of reading a pitch, and it builds your portfolio at the same time.</li>
+        <li>Charge per Reel, not per hour. Nobody wants to watch a clock.</li>
+      </ul>
+    </div>
+  </details>
+
+  <details>
+    <summary>CapCut, from nothing to paid work</summary>
+    <div class="dbody">
+      <p class="small">CapCut is still free on the Israeli App Store as of 28 July 2026, rated 12+. Some effects are behind a paid tier — check in the app, not on a blog.</p>
+      <div class="vid" data-yt="-7r0XC7k9L0"><img loading="lazy" src="https://i.ytimg.com/vi/-7r0XC7k9L0/hqdefault.jpg" alt=""><span class="play"></span><div class="vt">How to make a TikTok edit on CapCut in 5 minutes</div><div class="vm">Vivian Shea · 5:00 · 1.2M views</div></div>
+      <div class="vid" data-yt="PZgIO2vCwuM"><img loading="lazy" src="https://i.ytimg.com/vi/PZgIO2vCwuM/hqdefault.jpg" alt=""><span class="play"></span><div class="vt">Editing a REAL client Reel in CapCut, full process</div><div class="vm">BeTheCut · 18:45 · 2026</div></div>
+      <div class="vid" data-yt="ywVPUfWty0g"><img loading="lazy" src="https://i.ytimg.com/vi/ywVPUfWty0g/hqdefault.jpg" alt=""><span class="play"></span><div class="vt">How to film and edit videos for a small business</div><div class="vm">Uncomfy · 14:40 · 792K views</div></div>
+    </div>
+  </details>
+</article>
+
+<!-- 4 -->
+<article class="card reveal" style="--ac:var(--lav)">
+  <div class="rank">04</div>
+  <h3>Selling nail designs as files</h3>
+  <p>Not painting other people's nails. Drawing your own designs on the tablet and selling the files — nail shape templates other nail artists plan on, and decal sheets. You draw it once and sell it many times.</p>
+  <div class="stats">
+    <div class="stat"><div class="k">Per pack</div><div class="v">$5–10</div></div>
+    <div class="stat"><div class="k">First sale</div><div class="v">1–3 months</div></div>
+    <div class="stat"><div class="k">Per extra sale</div><div class="v">₪0 cost</div></div>
+  </div>
+  <p class="catch"><b>The catch.</b> Slow. Genuinely months of nothing while you keep uploading, and most shops make nothing at all. Etsy also needs a parent to own the shop and put their name and card on it, so it is not a decision you make alone.</p>
+  <p>One real advantage: the nail decals that sell best on Etsy are Disney and Star Wars characters, which is copyright infringement and gets shops closed. Your own drawings are yours. That is a genuine edge, not a consolation.</p>
+
+  <details>
+    <summary>What people actually charge</summary>
+    <div class="dbody">
+      <table class="tbl">
+        <tr><th>Shop</th><th>What</th><th>Price</th></tr>
+        <tr><td>QOZY Studios</td><td>Medium shapes pack</td><td>$5</td></tr>
+        <tr><td>Nail Designer</td><td>Single shape templates</td><td>$6</td></tr>
+        <tr><td>DRIPPINGLOW</td><td>5-shape bundle</td><td>£8</td></tr>
+        <tr><td>The Nail Studio</td><td>50-page package</td><td>$40</td></tr>
+      </table>
+      <a class="lk" href="https://qozystudios.com/products/nail-art-template-medium-shapes-pack" target="_blank" rel="noopener"><span>QOZY Studios</span><span class="ar">→</span></a>
+      <a class="lk" href="https://www.naildesigner.co/p/procreate-single-shape-template/" target="_blank" rel="noopener"><span>Nail Designer</span><span class="ar">→</span></a>
+      <a class="lk" href="https://www.thenailstudio.au/shop/p/procreate-nail-art-template-extra-long-wskae-9hbbt-2wc67-4b426-3s7rl" target="_blank" rel="noopener"><span>The Nail Studio</span><span class="ar">→</span></a>
+      <p class="small dim">Payhip and Gumroad are easier to set up than Etsy and have no per-listing fee. Still a parent's account.</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>How to draw them</summary>
+    <div class="dbody">
+      <div class="vid" data-yt="tWtbMPUHLcY"><img loading="lazy" src="https://i.ytimg.com/vi/tWtbMPUHLcY/hqdefault.jpg" alt=""><span class="play"></span><div class="vt">How to design nails with an iPad — free apps, templates</div><div class="vm">Hope Jordan · 29:58 · 2025</div></div>
+      <div class="vid" data-yt="-y_7fnTLnow"><img loading="lazy" src="https://i.ytimg.com/vi/-y_7fnTLnow/hqdefault.jpg" alt=""><span class="play"></span><div class="vt">My first month selling digital downloads on Etsy</div><div class="vm">Emery Talks · 21:38 · 277K views</div></div>
+    </div>
+  </details>
+</article>
+
+<!-- 5 -->
+<article class="card reveal" style="--ac:var(--teal)">
+  <div class="rank">05</div>
+  <h3>Voice work on Fiverr</h3>
+  <p>Recording a young voice for adverts, e-learning and story narration. Fiverr's rules name child voiceover specifically as allowed, on an account owned by a parent. Nobody sees your face, only your voice.</p>
+  <div class="stats">
+    <div class="stat"><div class="k">Per job</div><div class="v">$15–50</div></div>
+    <div class="stat"><div class="k">First paid</div><div class="v">3–6 months</div></div>
+    <div class="stat"><div class="k">To start</div><div class="v">~₪150 mic</div></div>
+  </div>
+  <p class="catch"><b>The catch.</b> The whole category is about 24 gigs and the one at the top is a family of four child actors with a proper recording booth and 2,000 completed orders. You are not beating that this summer. Start it now and forget about it.</p>
+  <p class="small dim">Voices.com bans under-18s completely, even with a parent. ACX blocks you twice over. Fiverr is the only one that allows it, and the gig has to say in writing that the work is done by a minor on a parent's account.</p>
+
+  <details>
+    <summary>What the gigs look like</summary>
+    <div class="dbody">
+      <a class="lk" href="https://www.fiverr.com/search/gigs?query=child%20voice%20over" target="_blank" rel="noopener"><span>Fiverr — child voice over</span><span class="ar">→</span></a>
+      <a class="lk" href="https://www.fiverr.com/riss02/record-a-female-child-or-teen-voice-over" target="_blank" rel="noopener"><span>Female child or teen voiceover</span><span class="px">$15</span><span class="ar">→</span></a>
+      <a class="lk" href="https://www.fiverr.com/kariannc/deliver-a-professional-american-boy-real-kid-voiceover" target="_blank" rel="noopener"><span>American kid voiceover</span><span class="px">$50</span><span class="ar">→</span></a>
+      <div class="vid" data-yt="NMtsjhJkYbE"><img loading="lazy" src="https://i.ytimg.com/vi/NMtsjhJkYbE/hqdefault.jpg" alt=""><span class="play"></span><div class="vt">What you need to know BEFORE starting on Fiverr</div><div class="vm">Mike Nardi · 9:41 · 600K views</div></div>
+    </div>
+  </details>
+</article>
+
+<section class="reveal">
+  <p class="eyebrow">One thing about nails</p>
+  <div class="warn">
+    <h3>Doing gel on other people is the part to be careful about</h3>
+    <p>Nothing in Israel stops you legally — there is no licence or certificate needed to do someone's nails. The problem is chemical, and it lands on you rather than on the person in the chair, because you are the one doing it over and over.</p>
+    <p>People who do nail treatments have <b>nine times the risk</b> of a permanent allergy to HEMA, which is in most gel systems. Permanent means permanent. Once you have it, it reacts to dental materials, medical adhesives, the electrodes used for a heart trace, and the cement used in bone surgery. Getting that at 13 follows you for decades.</p>
+    <p>Gloves do not reliably stop it. In a study of 37 gel and acrylic products, the chemicals went through nitrile, neoprene and PVC gloves, and in <b>every single product</b> the ingredients listed on the label were not the ingredients actually in the bottle.</p>
+    <p>Also worth knowing: EU rules class HEMA products as professional-use-only, TPO was banned outright in September 2025, and dermatologists point out that nails keep developing until you are 18, so regular gel on your own nails at your age can do damage that shows up years later.</p>
+    <p class="small dim">Doing your own nails occasionally is a different thing from doing five sets a week for money. Making designs on a tablet has none of this problem, which is one reason it is on the list and a nail business is not.</p>
+  </div>
+</section>
+
+<section class="reveal">
+  <p class="eyebrow">Money and rules</p>
+  <h2>Three things that are just true</h2>
+  <p><b>The money goes through a parent.</b> At 13 you cannot open an Israeli bank account, and Bit, PayPal, Etsy and Fiverr all hang off one. This is not a workaround, it is how every platform that allows people your age is built. PayBox Young is the clean way for it to reach you afterwards.</p>
+  <p><b>You cannot be employed, but you can work for yourself.</b> The minimum age to be someone's employee in Israel is 14, and only during official vacation. That rules out things like being a camp counsellor this year. It does not rule out any of the five above, because in all of them you are working for yourself. In June 2025 the Ministry of Labour told the Knesset it has no authority over self-employed minors at all.</p>
+  <p><b>Businesses need receipts.</b> If a business pays you, they need a receipt, which a parent has to issue. Sort that out before the first payment, not after.</p>
+</section>
+
+<footer>
+  <p>Prices, laws and platform rules checked July 2026. Rates in shekels converted at ₪3.06 to the dollar, the Bank of Israel rate on 31 July 2026. Every video and shop linked here was opened and confirmed working from Israel.</p>
+  <p>Things change. If a number here looks wrong, trust the number on the actual site.</p>
+</footer>
+
+</div>
+
+<script>
+(function(){
+  // click-to-load video, keeps the page light on mobile data
+  document.querySelectorAll('.vid').forEach(function(v){
+    v.addEventListener('click', function(){
+      var id = v.dataset.yt;
+      if(!id || v.dataset.loaded) return;
+      v.dataset.loaded = '1';
+      var f = document.createElement('iframe');
+      f.src = 'https://www.youtube-nocookie.com/embed/' + id + '?autoplay=1&rel=0';
+      f.allow = 'accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture';
+      f.allowFullscreen = true;
+      f.title = v.querySelector('.vt').textContent;
+      v.innerHTML = '';
+      v.appendChild(f);
+    });
+  });
+
+  var answers = {};
+  var quiz = document.getElementById('quiz');
+  var go = document.getElementById('go');
+
+  quiz.addEventListener('click', function(e){
+    var b = e.target.closest('.opt');
+    if(!b) return;
+    var q = b.closest('.q'), k = q.dataset.k;
+    q.querySelectorAll('.opt').forEach(function(o){ o.setAttribute('aria-pressed','false'); });
+    b.setAttribute('aria-pressed','true');
+    answers[k] = b.dataset.v;
+    go.disabled = Object.keys(answers).length < 4;
+  });
+
+  var OPTS = [
+    { id:'english', name:'An hour of games in English', pay:'₪90–135/hr', when:'1–2 weeks',
+      line:'Three kids, one hour a week, about ₪420 a month.',
+      score:function(a){ var s=10;
+        if(a.kids==='no') s-=9; if(a.home==='in') s-=4;
+        if(a.speed==='now') s+=2; if(a.time==='low') s+=3; return s; } },
+    { id:'commission', name:'Design commissions at school', pay:'₪20–40 each', when:'Days',
+      line:'Fastest money on the list, and you already own everything you need.',
+      score:function(a){ var s=8;
+        if(a.speed==='now') s+=3; if(a.home==='in') s+=1;
+        if(a.time==='low') s+=1; if(a.speed==='later') s-=2; return s; } },
+    { id:'reels', name:'Editing Reels for a local business', pay:'₪100–200/Reel', when:'2–4 weeks',
+      line:'One client covers the whole month, but you have to ask strangers.',
+      score:function(a){ var s=8;
+        if(a.home==='in') s-=3; if(a.speed==='soon') s+=3; if(a.speed==='now') s-=2;
+        if(a.time==='mid') s+=2; if(a.time==='high') s+=1; if(a.time==='low') s-=2; return s; } },
+    { id:'nails', name:'Selling nail designs as files', pay:'$5–10/pack', when:'1–3 months',
+      line:'Draw once, sell many times. Nothing happens for a while.',
+      score:function(a){ var s=6;
+        if(a.home==='in') s+=3; if(a.speed==='later') s+=4; if(a.speed==='now') s-=5;
+        if(a.time==='high') s+=2; if(a.time==='low') s-=2; return s; } },
+    { id:'voice', name:'Voice work on Fiverr', pay:'$15–50/job', when:'3–6 months',
+      line:'Nobody sees your face. Almost certainly not this summer.',
+      score:function(a){ var s=4;
+        if(a.home==='in') s+=3; if(a.speed==='later') s+=3; if(a.speed==='now') s-=4;
+        if(a.time==='high') s+=1; return s; } }
+  ];
+
+  go.addEventListener('click', function(){
+    var ranked = OPTS.map(function(o){ return { o:o, s:o.score(answers) }; })
+                     .sort(function(x,y){ return y.s - x.s; });
+    var top = ranked[0].o, second = ranked[1].o;
+    var el = document.getElementById('result');
+    el.innerHTML =
+      '<div class="rcard">' +
+        '<div class="rl">Start with this</div>' +
+        '<h3>' + top.name + '</h3>' +
+        '<p class="small" style="margin:0;color:var(--dim)">' + top.line + '</p>' +
+        '<div class="rrow">' +
+          '<div><div class="k">Pays</div><div class="v">' + top.pay + '</div></div>' +
+          '<div><div class="k">First paid</div><div class="v">' + top.when + '</div></div>' +
+        '</div>' +
+        '<div class="runner">Second choice: ' + second.name + ' — ' + second.pay + '</div>' +
+      '</div>';
+    el.hidden = false;
+    el.scrollIntoView({ behavior:'smooth', block:'center' });
+  });
+})();
+</script>
+</body>
+</html>
