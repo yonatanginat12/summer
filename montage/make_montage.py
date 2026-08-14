@@ -20,7 +20,7 @@ Usage:
 """
 import argparse, json, os, re, subprocess, sys, tempfile, shutil
 from datetime import datetime
-from PIL import Image, ImageDraw, ImageFont, features
+from PIL import Image, ImageDraw, ImageFont, ImageEnhance, ImageFilter, features
 try:
     from bidi import get_display          # python-bidi >= 0.5
 except Exception:
@@ -172,6 +172,24 @@ def fmt_ddm(d):
     return "%d.%d" % (d.day, d.month)
 
 
+def _circle_thumb(src_img, d, dim=False):
+    """Return an RGBA d×d circular crop of src_img (already loaded), optionally
+    dimmed/desaturated for 'not reached yet' milestones."""
+    im = src_img.convert("RGB")
+    r = max(d / im.width, d / im.height)
+    im = im.resize((max(1, int(im.width * r)), max(1, int(im.height * r))))
+    im = im.crop(((im.width - d) // 2, (im.height - d) // 2,
+                  (im.width - d) // 2 + d, (im.height - d) // 2 + d))
+    if dim:
+        im = ImageEnhance.Color(im).enhance(0.35)
+        im = ImageEnhance.Brightness(im).enhance(0.5)
+    im = im.convert("RGBA")
+    mask = Image.new("L", (d, d), 0)
+    ImageDraw.Draw(mask).ellipse([0, 0, d - 1, d - 1], fill=255)
+    im.putalpha(mask)
+    return im
+
+
 def overlay_png(path, cw, ch, caption, fontfile, timeline=None):
     """One transparent overlay per clip: a progress timeline across the top
     (marking where this clip sits in the whole recovery span) and a caption
@@ -181,8 +199,60 @@ def overlay_png(path, cw, ch, caption, fontfile, timeline=None):
     LAV = (182, 156, 255, 255)
     INK = (244, 241, 236, 255)
 
-    if timeline and timeline.get("dates") and timeline["dates"][timeline["idx"]]:
-        dates = timeline["dates"]; idx = timeline["idx"]
+    tl = timeline or {}
+    thumbs = tl.get("thumbs")
+    if thumbs and tl.get("dates") and tl["dates"][tl["idx"]]:
+        dates = tl["dates"]; idx = tl["idx"]; n = len(thumbs)
+        cur = dates[idx]
+        mx = int(cw * 0.075); bw = cw - 2 * mx
+        cy = int(ch * 0.082)                      # strip centre-line y
+        xs = [mx + (bw * j // max(n - 1, 1)) for j in range(n)]
+        cx = xs[idx]
+        rr, rc = int(cw * 0.023), int(cw * 0.040)  # normal / current radii
+
+        # connecting line: filled up to current, dim afterwards
+        d.line([(xs[0], cy), (xs[-1], cy)], fill=(120, 112, 150, 150), width=4)
+        if idx > 0:
+            d.line([(xs[0], cy), (cx, cy)], fill=LAV, width=6)
+
+        # a soft glow behind the current thumb (drawn on a separate layer + blur)
+        glow = Image.new("RGBA", (cw, ch), (0, 0, 0, 0))
+        gd = ImageDraw.Draw(glow)
+        gd.ellipse([cx - rc - 22, cy - rc - 22, cx + rc + 22, cy + rc + 22],
+                   fill=(182, 156, 255, 130))
+        img.alpha_composite(glow.filter(ImageFilter.GaussianBlur(16)))
+
+        # milestone thumbnails (skip current; drawn last, on top)
+        for j, tp in enumerate(thumbs):
+            if j == idx:
+                continue
+            future = j > idx
+            try:
+                th = _circle_thumb(Image.open(tp), 2 * rr, dim=future)
+            except Exception:
+                continue
+            img.alpha_composite(th, (xs[j] - rr, cy - rr))
+            ring = (150, 142, 178, 200) if future else (210, 196, 255, 255)
+            d.ellipse([xs[j] - rr, cy - rr, xs[j] + rr, cy + rr], outline=ring, width=3)
+
+        # current thumbnail — larger, bright ring
+        try:
+            cthumb = _circle_thumb(Image.open(thumbs[idx]), 2 * rc)
+            img.alpha_composite(cthumb, (cx - rc, cy - rc))
+        except Exception:
+            pass
+        d.ellipse([cx - rc, cy - rc, cx + rc, cy + rc], outline=(255, 255, 255, 255), width=5)
+        d.ellipse([cx - rc - 4, cy - rc - 4, cx + rc + 4, cy + rc + 4], outline=LAV, width=3)
+
+        # current date, centred over the active thumb, clamped to the frame
+        cf = _font(fontfile, max(44, ch // 34))
+        lbl = fmt_ddm(cur); lw, lh, loff = _text_size(d, lbl, cf)
+        lx = min(max(cx - lw // 2, mx - rr), cw - mx - lw + rr)
+        d.text((lx, cy - rc - lh - 20 - loff), lbl, font=cf, fill=INK)
+
+    elif tl.get("dates") and tl["dates"][tl["idx"]]:
+        # fallback: simple progress line + dots when no thumbnails are supplied
+        dates = tl["dates"]; idx = tl["idx"]
         valid = [x for x in dates if x]
         dmin, dmax = min(valid), max(valid)
         span = max((dmax - dmin).days, 1)
@@ -190,26 +260,18 @@ def overlay_png(path, cw, ch, caption, fontfile, timeline=None):
         by = int(ch * 0.085); h = 8; cy = by + h // 2
         xof = lambda dt: mx + int(bw * ((dt - dmin).days) / span)
         cur = dates[idx]; cx = xof(cur)
-        # track + progress fill
         d.rounded_rectangle([mx, by, mx + bw, by + h], radius=h // 2, fill=(70, 63, 92, 190))
         d.rounded_rectangle([mx, by, max(cx, mx + h), by + h], radius=h // 2, fill=LAV)
-        # milestone dots (past = bright, future = dim; current drawn separately)
         for j, dt in enumerate(dates):
             if not dt or j == idx:
                 continue
             x = xof(dt)
             col = (210, 196, 255, 255) if x <= cx else (120, 112, 150, 220)
             d.ellipse([x - 6, cy - 6, x + 6, cy + 6], fill=col)
-        # current marker with soft glow + white ring
         for r, a in [(28, 55), (20, 95)]:
             d.ellipse([cx - r, cy - r, cx + r, cy + r], fill=(182, 156, 255, a))
         d.ellipse([cx - 14, cy - 14, cx + 14, cy + 14], fill=LAV,
                   outline=(255, 255, 255, 255), width=4)
-        # endpoint dates + current date above the marker
-        ef = _font(fontfile, max(28, ch // 60))
-        d.text((mx, by + 22), fmt_ddm(dmin), font=ef, fill=(167, 159, 184, 255))
-        ew = _text_size(d, fmt_ddm(dmax), ef)[0]
-        d.text((mx + bw - ew, by + 22), fmt_ddm(dmax), font=ef, fill=(167, 159, 184, 255))
         cf = _font(fontfile, max(46, ch // 32))
         lbl = fmt_ddm(cur); lw, lh, loff = _text_size(d, lbl, cf)
         lx = min(max(cx - lw // 2, mx), mx + bw - lw)
@@ -225,6 +287,13 @@ def overlay_png(path, cw, ch, caption, fontfile, timeline=None):
                             fill=(14, 11, 20, 150))
         d.text((bx + padx, byy + pady - off), txt, font=font, fill=INK)
     img.save(path)
+
+
+def extract_thumb(src, ttime, dst, size=280):
+    """Grab a single representative frame (for the timeline filmstrip)."""
+    seek = ["-ss", "%.3f" % ttime] if ttime and ttime > 0 else []
+    run([FFMPEG, "-y"] + seek + ["-i", src, "-frames:v", "1",
+         "-vf", "scale=%d:-1" % size, dst])
 
 
 def normalize(src, dst, cw, ch, fps, caption, fontfile, workdir, idx, ss=0.0, t=None,
@@ -362,6 +431,20 @@ def main():
         dates = [clip_date(c) for c in clips]
         show_timeline = cfg.get("timeline", True) and any(dates)
 
+        # grab one representative thumbnail per clip for the timeline filmstrip
+        thumbs = None
+        if show_timeline:
+            thumbs = []
+            for i, clip in enumerate(clips, 1):
+                if isinstance(clip, dict):
+                    s = clip["path"]; sss = float(clip.get("ss", 0) or 0)
+                    tt = clip.get("t"); tt = float(tt) if tt else None
+                else:
+                    s, sss, tt = clip, 0.0, None
+                tp = os.path.join(work, "thumb_%02d.jpg" % i)
+                extract_thumb(s, sss + (tt / 2 if tt else 1.5), tp)
+                thumbs.append(tp)
+
         for i, clip in enumerate(clips, 1):
             if isinstance(clip, dict):
                 src = clip["path"]; cap = clip.get("caption", "")
@@ -369,7 +452,7 @@ def main():
                 t = float(t) if t else None
             else:
                 src, cap, ss, t = clip, "", 0.0, None
-            tl = {"dates": dates, "idx": i - 1} if show_timeline else None
+            tl = {"dates": dates, "idx": i - 1, "thumbs": thumbs} if show_timeline else None
             p = os.path.join(work, "%02d_clip.mp4" % i)
             print("normalizing (%d/%d): %s" % (i, len(clips), src))
             normalize(src, p, cw, ch, fps, cap, font, work, i, ss=ss, t=t, timeline=tl)

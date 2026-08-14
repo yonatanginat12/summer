@@ -23,8 +23,10 @@ the pieces join with perfect sync.
 - a per-clip **caption** (a milestone label on a translucent pill)
 - a per-clip **trim** (`ss` = start seconds, `t` = length) so you can keep just
   the meaningful few seconds of a long clip
-- a **progress timeline** across the top that marks where each clip sits in the
-  whole span and fills as the story advances (driven by a per-clip `date`)
+- a **progress timeline** across the top — a story-style filmstrip of circular
+  thumbnails taken from the clips themselves: past ones lit, upcoming ones
+  dimmed, the current clip enlarged with a glow, riding a line that fills as the
+  story advances (driven by a per-clip `date`)
 - a closing **outro card**
 - **background music**, automatically *ducked* under any spoken audio in the
   clips (music dips when someone is talking, comes back up otherwise)
