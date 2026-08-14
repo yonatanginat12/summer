@@ -69,7 +69,7 @@ python3 make_montage.py --config clips.json --out montage.mp4
 | `fps`          | output frame rate (30 is a good default)                       |
 | `fontfile`     | path to a `.ttf` used for all text                             |
 | `title`        | `{text, subtitle, secs}` opening card — omit for no title      |
-| `clips`        | ordered list of `{path, caption, ss, t, date}` — all but `path` optional. `date` (ISO `YYYY-MM-DD`, or `DD.MM`) places the clip on the timeline; if omitted it is parsed from a `YYYY-MM-DD` in the filename |
+| `clips`        | ordered list of `{path, caption, ss, t, date}` — all but `path` optional. A `path` may be a **video or a still image** (`.jpg/.png/…`); a still becomes a silent clip of length `t` (default 3.5s), framed the same way. `date` (ISO `YYYY-MM-DD`, or `DD.MM`) places it on the timeline; if omitted it is parsed from a `YYYY-MM-DD` in the filename |
 | `timeline`     | `true` (default) draws the progress timeline when clip dates are known; `false` disables it |
 | `outro`        | `{text, subtitle, secs}` closing card — omit for no outro      |
 | `music`        | path to an audio file — omit for none (clips keep their audio) |

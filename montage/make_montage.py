@@ -208,7 +208,9 @@ def overlay_png(path, cw, ch, caption, fontfile, timeline=None):
         cy = int(ch * 0.082)                      # strip centre-line y
         xs = [mx + (bw * j // max(n - 1, 1)) for j in range(n)]
         cx = xs[idx]
-        rr, rc = int(cw * 0.023), int(cw * 0.040)  # normal / current radii
+        # normal / current radii, shrunk so thumbnails don't collide when many
+        rr = max(13, min(int(cw * 0.023), int(bw / (2.3 * max(n - 1, 1)))))
+        rc = int(rr * 1.7)
 
         # connecting line: filled up to current, dim afterwards
         d.line([(xs[0], cy), (xs[-1], cy)], fill=(120, 112, 150, 150), width=4)
@@ -289,18 +291,30 @@ def overlay_png(path, cw, ch, caption, fontfile, timeline=None):
     img.save(path)
 
 
+IMG_EXT = (".jpg", ".jpeg", ".png", ".webp", ".bmp", ".gif", ".heic")
+
+
+def is_image(p):
+    return os.path.splitext(p)[1].lower() in IMG_EXT
+
+
 def extract_thumb(src, ttime, dst, size=280):
     """Grab a single representative frame (for the timeline filmstrip)."""
-    seek = ["-ss", "%.3f" % ttime] if ttime and ttime > 0 else []
+    seek = [] if is_image(src) else (["-ss", "%.3f" % ttime] if ttime and ttime > 0 else [])
     run([FFMPEG, "-y"] + seek + ["-i", src, "-frames:v", "1",
          "-vf", "scale=%d:-1" % size, dst])
 
 
 def normalize(src, dst, cw, ch, fps, caption, fontfile, workdir, idx, ss=0.0, t=None,
               timeline=None):
-    info = probe(src)
-    # effective duration after optional trim (for the synthesized silent track)
-    eff = t if t else max(info["dur"] - ss, 0.1)
+    # A still photo becomes a fixed-length silent clip; a video keeps its audio.
+    image = is_image(src)
+    if image:
+        eff = t or 3.5
+        info = {"has_audio": False, "dur": eff}
+    else:
+        info = probe(src)
+        eff = t if t else max(info["dur"] - ss, 0.1)
     vf = (
         "[0:v]scale={cw}:{ch}:force_original_aspect_ratio=increase,"
         "crop={cw}:{ch},boxblur=luma_radius=40:luma_power=2,setsar=1[bg];"
@@ -317,11 +331,16 @@ def normalize(src, dst, cw, ch, fps, caption, fontfile, workdir, idx, ss=0.0, t=
         last = "[base2]"
     vf += ";{last}fps={fps},format=yuv420p[v]".format(last=last, fps=fps)
 
-    # -ss and -t must both precede -i src so they apply to the source as
-    # input options (a -t placed after -i binds to the *next* input instead).
-    seek = ["-ss", "%.3f" % ss] if ss else []
-    lim = ["-t", "%.3f" % t] if t else []
-    cmd = [FFMPEG, "-y"] + seek + lim + ["-i", src]
+    # For a still image, loop it for the target duration; for a video, -ss/-t
+    # must both precede -i so they apply to the source (a -t placed after -i
+    # would bind to the *next* input instead).
+    if image:
+        input0 = ["-loop", "1", "-t", "%.3f" % eff, "-i", src]
+    else:
+        seek = ["-ss", "%.3f" % ss] if ss else []
+        lim = ["-t", "%.3f" % t] if t else []
+        input0 = seek + lim + ["-i", src]
+    cmd = [FFMPEG, "-y"] + input0
     if not info["has_audio"]:
         cmd += ["-f", "lavfi", "-t", "%.3f" % eff,
                 "-i", "anullsrc=channel_layout=stereo:sample_rate=48000"]
