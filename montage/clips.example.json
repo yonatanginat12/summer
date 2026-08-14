@@ -7,10 +7,10 @@
   "title":  { "text": "One Step at a Time", "subtitle": "For our friend", "secs": 3 },
 
   "clips": [
-    { "path": "clips/01.mp4", "caption": "Week 1  ·  ICU" },
-    { "path": "clips/02.mp4", "caption": "Week 3  ·  First words" },
+    { "path": "clips/01.mp4", "caption": "Week 1  ·  ICU",          "ss": 2, "t": 6 },
+    { "path": "clips/02.mp4", "caption": "Week 3  ·  First words",   "ss": 0, "t": 5 },
     { "path": "clips/03.mp4", "caption": "Week 6  ·  Standing up" },
-    { "path": "clips/04.mp4", "caption": "Week 10  ·  First steps" }
+    { "path": "clips/04.mp4", "caption": "Week 10  ·  First steps",  "ss": 8, "t": 7 }
   ],
 
   "outro": { "text": "Welcome back", "subtitle": "We never stopped rooting for you", "secs": 4 },

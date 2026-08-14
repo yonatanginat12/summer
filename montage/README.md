@@ -21,15 +21,20 @@ the pieces join with perfect sync.
 
 - an opening **title card** (title + subtitle)
 - a per-clip **caption** (a date or milestone label, on a translucent pill)
+- a per-clip **trim** (`ss` = start seconds, `t` = length) so you can keep just
+  the meaningful few seconds of a long clip
 - a closing **outro card**
 - **background music**, automatically *ducked* under any spoken audio in the
   clips (music dips when someone is talking, comes back up otherwise)
+- **right-to-left text** (Hebrew / Arabic) rendered correctly, via `python-bidi`
 
 ## Requirements
 
 - `ffmpeg` and `ffprobe` (any recent build) on `PATH`, or point to them with
   the `FFMPEG` / `FFPROBE` environment variables.
 - Python 3 with `Pillow` (`pip install Pillow`).
+- For Hebrew/Arabic captions, `python-bidi` (`pip install python-bidi`) and a
+  font that covers the script (e.g. DejaVu Sans, which ships on most Linux).
 
 If you don't have a system ffmpeg, static builds work fine:
 
@@ -59,7 +64,7 @@ python3 make_montage.py --config clips.json --out montage.mp4
 | `fps`          | output frame rate (30 is a good default)                       |
 | `fontfile`     | path to a `.ttf` used for all text                             |
 | `title`        | `{text, subtitle, secs}` opening card — omit for no title      |
-| `clips`        | ordered list of `{path, caption}` (caption optional)           |
+| `clips`        | ordered list of `{path, caption, ss, t}` — `caption`, `ss` (start offset, seconds) and `t` (length, seconds) are all optional |
 | `outro`        | `{text, subtitle, secs}` closing card — omit for no outro      |
 | `music`        | path to an audio file — omit for none (clips keep their audio) |
 | `duck`         | `true` = dip music under speech; `false` = simple quiet mix    |

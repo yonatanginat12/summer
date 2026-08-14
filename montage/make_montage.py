@@ -20,6 +20,14 @@ Usage:
 """
 import argparse, json, os, subprocess, sys, tempfile, shutil
 from PIL import Image, ImageDraw, ImageFont
+try:
+    from bidi import get_display          # python-bidi >= 0.5
+except Exception:
+    try:
+        from bidi.algorithm import get_display
+    except Exception:
+        def get_display(s):               # graceful no-op if bidi missing
+            return s
 
 def _resolve(name, envvar, *fallbacks):
     if os.environ.get(envvar):
@@ -39,6 +47,25 @@ FFPROBE = _resolve("ffprobe", "FFPROBE",
                    os.path.join(SP, "node_modules/ffprobe-static/bin/linux/x64/ffprobe"))
 
 DEFAULT_FONT = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
+
+
+def shape(text):
+    """Reorder logical text (e.g. Hebrew/Arabic) to visual order for drawing."""
+    return get_display(text) if text else text
+
+
+def wrap_logical(draw, text, font, maxw):
+    """Greedy word-wrap on logical text; returns a list of logical lines."""
+    words, lines, cur = text.split(), [], ""
+    for w in words:
+        t = (cur + " " + w).strip()
+        if draw.textbbox((0, 0), shape(t), font=font)[2] <= maxw or not cur:
+            cur = t
+        else:
+            lines.append(cur); cur = w
+    if cur:
+        lines.append(cur)
+    return lines
 
 
 def run(cmd):
@@ -80,6 +107,7 @@ def caption_png(path, cw, ch, text, fontfile):
     d = ImageDraw.Draw(img)
     fs = max(30, ch // 26)
     font = _font(fontfile, fs)
+    text = shape(text)
     tw, th, off = _text_size(d, text, font)
     padx, pady = int(fs * 0.7), int(fs * 0.45)
     bw, bh = tw + 2 * padx, th + 2 * pady
@@ -98,16 +126,7 @@ def title_png(path, cw, ch, text, subtitle, fontfile):
     fs = max(52, cw // 11)
     font = _font(fontfile, fs)
 
-    # wrap title to fit width
-    words, lines, cur = text.split(), [], ""
-    for w in words:
-        t = (cur + " " + w).strip()
-        if _text_size(d, t, font)[0] <= cw * 0.86 or not cur:
-            cur = t
-        else:
-            lines.append(cur); cur = w
-    if cur:
-        lines.append(cur)
+    lines = [shape(ln) for ln in wrap_logical(d, text, font, cw * 0.86)]
 
     line_h = int(fs * 1.16)
     subf = _font(fontfile, max(30, cw // 20))
@@ -121,14 +140,17 @@ def title_png(path, cw, ch, text, subtitle, fontfile):
         d.text((x, y - off + int(fs * 0.16)), ln, font=font, fill=(244, 241, 236, 255))
         y += line_h
     if subtitle:
-        tw, th, off = _text_size(d, subtitle, subf)
+        sub = shape(subtitle)
+        tw, th, off = _text_size(d, sub, subf)
         d.text(((cw - tw) // 2, y + int(subf.size * 0.2) - off),
-               subtitle, font=subf, fill=(182, 156, 255, 255))
+               sub, font=subf, fill=(182, 156, 255, 255))
     img.save(path)
 
 
-def normalize(src, dst, cw, ch, fps, caption, fontfile, workdir, idx):
+def normalize(src, dst, cw, ch, fps, caption, fontfile, workdir, idx, ss=0.0, t=None):
     info = probe(src)
+    # effective duration after optional trim (for the synthesized silent track)
+    eff = t if t else max(info["dur"] - ss, 0.1)
     vf = (
         "[0:v]scale={cw}:{ch}:force_original_aspect_ratio=increase,"
         "crop={cw}:{ch},boxblur=luma_radius=40:luma_power=2,setsar=1[bg];"
@@ -145,9 +167,11 @@ def normalize(src, dst, cw, ch, fps, caption, fontfile, workdir, idx):
         last = "[base2]"
     vf += ";{last}fps={fps},format=yuv420p[v]".format(last=last, fps=fps)
 
-    cmd = [FFMPEG, "-y", "-i", src]
+    seek = ["-ss", "%.3f" % ss] if ss else []
+    lim = ["-t", "%.3f" % t] if t else []
+    cmd = [FFMPEG, "-y"] + seek + ["-i", src] + lim
     if not info["has_audio"]:
-        cmd += ["-f", "lavfi", "-t", "%.3f" % max(info["dur"], 0.1),
+        cmd += ["-f", "lavfi", "-t", "%.3f" % eff,
                 "-i", "anullsrc=channel_layout=stereo:sample_rate=48000"]
     cmd += extra_inputs
     cmd += ["-filter_complex", vf, "-map", "[v]"]
@@ -224,11 +248,15 @@ def main():
             parts.append(p)
 
         for i, clip in enumerate(cfg["clips"], 1):
-            src = clip["path"] if isinstance(clip, dict) else clip
-            cap = clip.get("caption", "") if isinstance(clip, dict) else ""
+            if isinstance(clip, dict):
+                src = clip["path"]; cap = clip.get("caption", "")
+                ss = float(clip.get("ss", 0) or 0); t = clip.get("t")
+                t = float(t) if t else None
+            else:
+                src, cap, ss, t = clip, "", 0.0, None
             p = os.path.join(work, "%02d_clip.mp4" % i)
             print("normalizing (%d/%d): %s" % (i, len(cfg["clips"]), src))
-            normalize(src, p, cw, ch, fps, cap, font, work, i)
+            normalize(src, p, cw, ch, fps, cap, font, work, i, ss=ss, t=t)
             parts.append(p)
 
         if cfg.get("outro"):
