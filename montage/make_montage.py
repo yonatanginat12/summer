@@ -18,8 +18,9 @@ so we get full control over fonts, colour and shadow.
 Usage:
   python3 make_montage.py --config clips.json --out montage.mp4
 """
-import argparse, json, os, subprocess, sys, tempfile, shutil
-from PIL import Image, ImageDraw, ImageFont
+import argparse, json, os, re, subprocess, sys, tempfile, shutil
+from datetime import datetime
+from PIL import Image, ImageDraw, ImageFont, features
 try:
     from bidi import get_display          # python-bidi >= 0.5
 except Exception:
@@ -28,6 +29,8 @@ except Exception:
     except Exception:
         def get_display(s):               # graceful no-op if bidi missing
             return s
+
+_HAS_RAQM = features.check("raqm")
 
 def _resolve(name, envvar, *fallbacks):
     if os.environ.get(envvar):
@@ -51,8 +54,13 @@ PRESET = "medium"  # libx264 preset; overridable via config "preset"
 
 
 def shape(text):
-    """Reorder logical text (e.g. Hebrew/Arabic) to visual order for drawing."""
-    return get_display(text) if text else text
+    """Order text for drawing. Pillow built with libraqm lays out RTL
+    (Hebrew/Arabic) correctly from *logical* order on its own, so pass it
+    through untouched there; only without raqm do we reorder via python-bidi
+    (applying it under raqm would double-reverse and mangle the text)."""
+    if not text:
+        return text
+    return text if _HAS_RAQM else get_display(text)
 
 
 def wrap_logical(draw, text, font, maxw):
@@ -148,7 +156,79 @@ def title_png(path, cw, ch, text, subtitle, fontfile):
     img.save(path)
 
 
-def normalize(src, dst, cw, ch, fps, caption, fontfile, workdir, idx, ss=0.0, t=None):
+def parse_date(s):
+    """Accept ISO (YYYY-MM-DD), DD.MM.YYYY or DD.MM; return a date or None."""
+    if not s:
+        return None
+    for fmt in ("%Y-%m-%d", "%d.%m.%Y", "%d.%m"):
+        try:
+            return datetime.strptime(str(s), fmt).date()
+        except ValueError:
+            pass
+    return None
+
+
+def fmt_ddm(d):
+    return "%d.%d" % (d.day, d.month)
+
+
+def overlay_png(path, cw, ch, caption, fontfile, timeline=None):
+    """One transparent overlay per clip: a progress timeline across the top
+    (marking where this clip sits in the whole recovery span) and a caption
+    pill along the bottom."""
+    img = Image.new("RGBA", (cw, ch), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    LAV = (182, 156, 255, 255)
+    INK = (244, 241, 236, 255)
+
+    if timeline and timeline.get("dates") and timeline["dates"][timeline["idx"]]:
+        dates = timeline["dates"]; idx = timeline["idx"]
+        valid = [x for x in dates if x]
+        dmin, dmax = min(valid), max(valid)
+        span = max((dmax - dmin).days, 1)
+        mx = int(cw * 0.10); bw = cw - 2 * mx
+        by = int(ch * 0.085); h = 8; cy = by + h // 2
+        xof = lambda dt: mx + int(bw * ((dt - dmin).days) / span)
+        cur = dates[idx]; cx = xof(cur)
+        # track + progress fill
+        d.rounded_rectangle([mx, by, mx + bw, by + h], radius=h // 2, fill=(70, 63, 92, 190))
+        d.rounded_rectangle([mx, by, max(cx, mx + h), by + h], radius=h // 2, fill=LAV)
+        # milestone dots (past = bright, future = dim; current drawn separately)
+        for j, dt in enumerate(dates):
+            if not dt or j == idx:
+                continue
+            x = xof(dt)
+            col = (210, 196, 255, 255) if x <= cx else (120, 112, 150, 220)
+            d.ellipse([x - 6, cy - 6, x + 6, cy + 6], fill=col)
+        # current marker with soft glow + white ring
+        for r, a in [(28, 55), (20, 95)]:
+            d.ellipse([cx - r, cy - r, cx + r, cy + r], fill=(182, 156, 255, a))
+        d.ellipse([cx - 14, cy - 14, cx + 14, cy + 14], fill=LAV,
+                  outline=(255, 255, 255, 255), width=4)
+        # endpoint dates + current date above the marker
+        ef = _font(fontfile, max(28, ch // 60))
+        d.text((mx, by + 22), fmt_ddm(dmin), font=ef, fill=(167, 159, 184, 255))
+        ew = _text_size(d, fmt_ddm(dmax), ef)[0]
+        d.text((mx + bw - ew, by + 22), fmt_ddm(dmax), font=ef, fill=(167, 159, 184, 255))
+        cf = _font(fontfile, max(46, ch // 32))
+        lbl = fmt_ddm(cur); lw, lh, loff = _text_size(d, lbl, cf)
+        lx = min(max(cx - lw // 2, mx), mx + bw - lw)
+        d.text((lx, by - lh - 26 - loff), lbl, font=cf, fill=INK)
+
+    if caption:
+        fs = max(30, ch // 26); font = _font(fontfile, fs); txt = shape(caption)
+        tw, th, off = _text_size(d, txt, font)
+        padx, pady = int(fs * 0.7), int(fs * 0.45)
+        bw2, bh2 = tw + 2 * padx, th + 2 * pady
+        bx = (cw - bw2) // 2; byy = ch - bh2 - ch // 12
+        d.rounded_rectangle([bx, byy, bx + bw2, byy + bh2], radius=bh2 // 2,
+                            fill=(14, 11, 20, 150))
+        d.text((bx + padx, byy + pady - off), txt, font=font, fill=INK)
+    img.save(path)
+
+
+def normalize(src, dst, cw, ch, fps, caption, fontfile, workdir, idx, ss=0.0, t=None,
+              timeline=None):
     info = probe(src)
     # effective duration after optional trim (for the synthesized silent track)
     eff = t if t else max(info["dur"] - ss, 0.1)
@@ -160,9 +240,9 @@ def normalize(src, dst, cw, ch, fps, caption, fontfile, workdir, idx, ss=0.0, t=
     ).format(cw=cw, ch=ch)
 
     extra_inputs, last = [], "[base]"
-    if caption:
+    if caption or timeline:
         png = os.path.join(workdir, "cap_%02d.png" % idx)
-        caption_png(png, cw, ch, caption, fontfile)
+        overlay_png(png, cw, ch, caption, fontfile, timeline)
         extra_inputs = ["-i", png]
         vf += ";[base][{n}:v]overlay=0:0[base2]".format(n=1 + (0 if info["has_audio"] else 1))
         last = "[base2]"
@@ -268,16 +348,31 @@ def main():
                       font, t.get("secs", 3), work, "title")
             parts.append(p)
 
-        for i, clip in enumerate(cfg["clips"], 1):
+        clips = cfg["clips"]
+        # resolve a date per clip (explicit "date", else parsed from the path)
+        def clip_date(c):
+            if isinstance(c, dict):
+                d = parse_date(c.get("date"))
+                if d:
+                    return d
+                m = re.search(r"(\d{4}-\d{2}-\d{2})", c.get("path", ""))
+                return parse_date(m.group(1)) if m else None
+            m = re.search(r"(\d{4}-\d{2}-\d{2})", c)
+            return parse_date(m.group(1)) if m else None
+        dates = [clip_date(c) for c in clips]
+        show_timeline = cfg.get("timeline", True) and any(dates)
+
+        for i, clip in enumerate(clips, 1):
             if isinstance(clip, dict):
                 src = clip["path"]; cap = clip.get("caption", "")
                 ss = float(clip.get("ss", 0) or 0); t = clip.get("t")
                 t = float(t) if t else None
             else:
                 src, cap, ss, t = clip, "", 0.0, None
+            tl = {"dates": dates, "idx": i - 1} if show_timeline else None
             p = os.path.join(work, "%02d_clip.mp4" % i)
-            print("normalizing (%d/%d): %s" % (i, len(cfg["clips"]), src))
-            normalize(src, p, cw, ch, fps, cap, font, work, i, ss=ss, t=t)
+            print("normalizing (%d/%d): %s" % (i, len(clips), src))
+            normalize(src, p, cw, ch, fps, cap, font, work, i, ss=ss, t=t, timeline=tl)
             parts.append(p)
 
         if cfg.get("outro"):

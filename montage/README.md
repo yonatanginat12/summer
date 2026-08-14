@@ -20,13 +20,16 @@ the pieces join with perfect sync.
 ## What it can add
 
 - an opening **title card** (title + subtitle)
-- a per-clip **caption** (a date or milestone label, on a translucent pill)
+- a per-clip **caption** (a milestone label on a translucent pill)
 - a per-clip **trim** (`ss` = start seconds, `t` = length) so you can keep just
   the meaningful few seconds of a long clip
+- a **progress timeline** across the top that marks where each clip sits in the
+  whole span and fills as the story advances (driven by a per-clip `date`)
 - a closing **outro card**
 - **background music**, automatically *ducked* under any spoken audio in the
   clips (music dips when someone is talking, comes back up otherwise)
-- **right-to-left text** (Hebrew / Arabic) rendered correctly, via `python-bidi`
+- **right-to-left text** (Hebrew / Arabic) rendered correctly (Pillow+libraqm
+  when available, otherwise `python-bidi`)
 
 ## Requirements
 
@@ -64,7 +67,8 @@ python3 make_montage.py --config clips.json --out montage.mp4
 | `fps`          | output frame rate (30 is a good default)                       |
 | `fontfile`     | path to a `.ttf` used for all text                             |
 | `title`        | `{text, subtitle, secs}` opening card — omit for no title      |
-| `clips`        | ordered list of `{path, caption, ss, t}` — `caption`, `ss` (start offset, seconds) and `t` (length, seconds) are all optional |
+| `clips`        | ordered list of `{path, caption, ss, t, date}` — all but `path` optional. `date` (ISO `YYYY-MM-DD`, or `DD.MM`) places the clip on the timeline; if omitted it is parsed from a `YYYY-MM-DD` in the filename |
+| `timeline`     | `true` (default) draws the progress timeline when clip dates are known; `false` disables it |
 | `outro`        | `{text, subtitle, secs}` closing card — omit for no outro      |
 | `music`        | path to an audio file — omit for none (clips keep their audio) |
 | `duck`         | `true` = dip music under speech; `false` = simple quiet mix    |

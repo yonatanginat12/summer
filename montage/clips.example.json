@@ -6,11 +6,13 @@
 
   "title":  { "text": "One Step at a Time", "subtitle": "For our friend", "secs": 3 },
 
+  "timeline": true,
+
   "clips": [
-    { "path": "clips/01.mp4", "caption": "Week 1  ·  ICU",          "ss": 2, "t": 6 },
-    { "path": "clips/02.mp4", "caption": "Week 3  ·  First words",   "ss": 0, "t": 5 },
-    { "path": "clips/03.mp4", "caption": "Week 6  ·  Standing up" },
-    { "path": "clips/04.mp4", "caption": "Week 10  ·  First steps",  "ss": 8, "t": 7 }
+    { "path": "clips/01.mp4", "date": "2026-07-12", "caption": "First steps", "ss": 2, "t": 6 },
+    { "path": "clips/02.mp4", "date": "2026-07-20", "caption": "Standing up",  "ss": 0, "t": 5 },
+    { "path": "clips/03.mp4", "date": "2026-08-01", "caption": "Walking" },
+    { "path": "clips/04.mp4", "date": "2026-08-12", "caption": "Back home",    "ss": 8, "t": 7 }
   ],
 
   "outro": { "text": "Welcome back", "subtitle": "We never stopped rooting for you", "secs": 4 },
