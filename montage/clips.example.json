@@ -1,0 +1,20 @@
+{
+  "width": 1080,
+  "height": 1920,
+  "fps": 30,
+  "fontfile": "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
+
+  "title":  { "text": "One Step at a Time", "subtitle": "For our friend", "secs": 3 },
+
+  "clips": [
+    { "path": "clips/01.mp4", "caption": "Week 1  ·  ICU" },
+    { "path": "clips/02.mp4", "caption": "Week 3  ·  First words" },
+    { "path": "clips/03.mp4", "caption": "Week 6  ·  Standing up" },
+    { "path": "clips/04.mp4", "caption": "Week 10  ·  First steps" }
+  ],
+
+  "outro": { "text": "Welcome back", "subtitle": "We never stopped rooting for you", "secs": 4 },
+
+  "music": "clips/music.m4a",
+  "duck":  true
+}
