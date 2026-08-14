@@ -205,7 +205,7 @@ def overlay_png(path, cw, ch, caption, fontfile, timeline=None):
         dates = tl["dates"]; idx = tl["idx"]; n = len(thumbs)
         cur = dates[idx]
         mx = int(cw * 0.075); bw = cw - 2 * mx
-        cy = int(ch * 0.082)                      # strip centre-line y
+        cy = int(ch * 0.115)                      # strip centre-line y (room for date badge)
         xs = [mx + (bw * j // max(n - 1, 1)) for j in range(n)]
         cx = xs[idx]
         # normal / current radii, shrunk so thumbnails don't collide when many
@@ -246,11 +246,19 @@ def overlay_png(path, cw, ch, caption, fontfile, timeline=None):
         d.ellipse([cx - rc, cy - rc, cx + rc, cy + rc], outline=(255, 255, 255, 255), width=5)
         d.ellipse([cx - rc - 4, cy - rc - 4, cx + rc + 4, cy + rc + 4], outline=LAV, width=3)
 
-        # current date, centred over the active thumb, clamped to the frame
-        cf = _font(fontfile, max(44, ch // 34))
+        # current date as a bold badge above the active thumb (dark pill +
+        # lavender outline) so it stays legible over any footage
+        cf = _font(fontfile, max(60, ch // 23))
         lbl = fmt_ddm(cur); lw, lh, loff = _text_size(d, lbl, cf)
-        lx = min(max(cx - lw // 2, mx - rr), cw - mx - lw + rr)
-        d.text((lx, cy - rc - lh - 20 - loff), lbl, font=cf, fill=INK)
+        padx, pady = int(cf.size * 0.5), int(cf.size * 0.26)
+        bwb, bhb = lw + 2 * padx, lh + 2 * pady
+        bx = int(min(max(cx - bwb // 2, 10), cw - 10 - bwb))
+        byb = max(8, cy - rc - bhb - 16)
+        d.rounded_rectangle([bx, byb, bx + bwb, byb + bhb], radius=bhb // 2,
+                            fill=(14, 11, 20, 205))
+        d.rounded_rectangle([bx, byb, bx + bwb, byb + bhb], radius=bhb // 2,
+                            outline=LAV, width=4)
+        d.text((bx + padx, byb + pady - loff), lbl, font=cf, fill=INK)
 
     elif tl.get("dates") and tl["dates"][tl["idx"]]:
         # fallback: simple progress line + dots when no thumbnails are supplied
