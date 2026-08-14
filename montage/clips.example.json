@@ -16,5 +16,8 @@
   "outro": { "text": "Welcome back", "subtitle": "We never stopped rooting for you", "secs": 4 },
 
   "music": "clips/music.m4a",
-  "duck":  true
+  "duck":  true,
+  "music_vol": 0.6,
+  "music_ss": 0,
+  "fade": 2.5
 }

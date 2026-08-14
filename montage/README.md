@@ -68,6 +68,10 @@ python3 make_montage.py --config clips.json --out montage.mp4
 | `outro`        | `{text, subtitle, secs}` closing card — omit for no outro      |
 | `music`        | path to an audio file — omit for none (clips keep their audio) |
 | `duck`         | `true` = dip music under speech; `false` = simple quiet mix    |
+| `music_vol`    | base music level before ducking (0–1, default 0.6)            |
+| `music_ss`     | start offset into the music track, seconds (default 0)        |
+| `fade`         | music fade in/out length, seconds (default 2.5)               |
+| `preset`       | libx264 speed/quality preset (default `medium`; `veryfast` for quick drafts) |
 
 ## Notes
 

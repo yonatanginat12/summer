@@ -47,6 +47,7 @@ FFPROBE = _resolve("ffprobe", "FFPROBE",
                    os.path.join(SP, "node_modules/ffprobe-static/bin/linux/x64/ffprobe"))
 
 DEFAULT_FONT = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
+PRESET = "medium"  # libx264 preset; overridable via config "preset"
 
 
 def shape(text):
@@ -167,9 +168,11 @@ def normalize(src, dst, cw, ch, fps, caption, fontfile, workdir, idx, ss=0.0, t=
         last = "[base2]"
     vf += ";{last}fps={fps},format=yuv420p[v]".format(last=last, fps=fps)
 
+    # -ss and -t must both precede -i src so they apply to the source as
+    # input options (a -t placed after -i binds to the *next* input instead).
     seek = ["-ss", "%.3f" % ss] if ss else []
     lim = ["-t", "%.3f" % t] if t else []
-    cmd = [FFMPEG, "-y"] + seek + ["-i", src] + lim
+    cmd = [FFMPEG, "-y"] + seek + lim + ["-i", src]
     if not info["has_audio"]:
         cmd += ["-f", "lavfi", "-t", "%.3f" % eff,
                 "-i", "anullsrc=channel_layout=stereo:sample_rate=48000"]
@@ -181,7 +184,7 @@ def normalize(src, dst, cw, ch, fps, caption, fontfile, workdir, idx, ss=0.0, t=
                 "loudnorm=I=-16:TP=-1.5:LRA=11"]
     else:
         cmd += ["-map", "1:a"]
-    cmd += ["-c:v", "libx264", "-preset", "medium", "-crf", "20",
+    cmd += ["-c:v", "libx264", "-preset", PRESET, "-crf", "20",
             "-c:a", "aac", "-b:a", "192k", "-r", str(fps), dst]
     run(cmd)
 
@@ -196,7 +199,7 @@ def make_card(dst, cw, ch, fps, text, subtitle, fontfile, secs, workdir, tag):
          "-f", "lavfi", "-t", str(secs),
          "-i", "anullsrc=channel_layout=stereo:sample_rate=48000",
          "-filter_complex", vf, "-map", "[v]", "-map", "2:a",
-         "-c:v", "libx264", "-preset", "medium", "-crf", "20",
+         "-c:v", "libx264", "-preset", PRESET, "-crf", "20",
          "-c:a", "aac", "-b:a", "192k", "-r", str(fps), dst])
 
 
@@ -211,18 +214,34 @@ def concat(parts, dst, workdir):
     streams = "".join("[%d:v][%d:a]" % (i, i) for i in range(n))
     fc = "%sconcat=n=%d:v=1:a=1[v][a]" % (streams, n)
     cmd += ["-filter_complex", fc, "-map", "[v]", "-map", "[a]",
-            "-c:v", "libx264", "-preset", "medium", "-crf", "20",
+            "-c:v", "libx264", "-preset", PRESET, "-crf", "20",
             "-c:a", "aac", "-b:a", "192k", dst]
     run(cmd)
 
 
-def add_music(video, music, dst, duck=True):
+def add_music(video, music, dst, duck=True, music_vol=0.6, music_ss=0.0, fade=2.5):
+    """Mix a background track under the video's own audio.
+
+    When duck=True the *music* is side-chain compressed by the clips' audio,
+    so it dips under speech/significant sound and swells back in the quiet
+    parts. Music is faded in at the start and out at the end.
+    """
+    dur = probe(video)["dur"]
+    fo = max(dur - fade, 0.0)
+    # music: resample, base volume, fade in/out over the montage length
+    m = ("[1:a]aresample=48000,aformat=channel_layouts=stereo,"
+         "volume={mv},afade=t=in:st=0:d={fi},afade=t=out:st={fo}:d={fd}[m0]"
+         ).format(mv=music_vol, fi=min(fade, 1.5), fo=fo, fd=fade)
+    # clip audio, split into one copy to mix and one to key the ducking
+    v = "[0:a]aresample=48000,aformat=channel_layouts=stereo,asplit=2[vmix][vkey]"
     if duck:
-        fc = ("[1:a]volume=0.9[m];"
-              "[0:a][m]sidechaincompress=threshold=0.03:ratio=6:attack=20:release=500[a]")
+        chain = ("[m0][vkey]sidechaincompress=threshold=0.04:ratio=6:"
+                 "attack=15:release=350[mduck];"
+                 "[vmix][mduck]amix=inputs=2:duration=first:normalize=0[a]")
     else:
-        fc = "[1:a]volume=0.25[m];[0:a][m]amix=inputs=2:duration=first[a]"
-    run([FFMPEG, "-y", "-i", video, "-stream_loop", "-1", "-i", music,
+        chain = "[vmix][m0]amix=inputs=2:duration=first:normalize=0[a]"
+    fc = ";".join([m, v, chain])
+    run([FFMPEG, "-y", "-i", video, "-ss", "%.3f" % music_ss, "-i", music,
          "-filter_complex", fc, "-map", "0:v", "-map", "[a]",
          "-c:v", "copy", "-c:a", "aac", "-b:a", "192k", "-shortest", dst])
 
@@ -235,6 +254,8 @@ def main():
     args = ap.parse_args()
 
     cfg = json.load(open(args.config))
+    global PRESET
+    PRESET = cfg.get("preset", PRESET)
     cw, ch, fps = cfg.get("width", 1080), cfg.get("height", 1920), cfg.get("fps", 30)
     font = cfg.get("fontfile") or DEFAULT_FONT
     work = tempfile.mkdtemp(prefix="montage_")
@@ -269,7 +290,10 @@ def main():
         tmp = os.path.join(work, "concat.mp4")
         concat(parts, tmp, work)
         if cfg.get("music") and os.path.exists(cfg["music"]):
-            add_music(tmp, cfg["music"], args.out, duck=cfg.get("duck", True))
+            add_music(tmp, cfg["music"], args.out, duck=cfg.get("duck", True),
+                      music_vol=float(cfg.get("music_vol", 0.6)),
+                      music_ss=float(cfg.get("music_ss", 0.0)),
+                      fade=float(cfg.get("fade", 2.5)))
         else:
             shutil.copy(tmp, args.out)
         print("DONE ->", args.out)
