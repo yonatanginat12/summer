@@ -27,15 +27,18 @@ HTML = f"""<!DOCTYPE html><html lang="he" dir="rtl"><head><meta charset="utf-8">
 .ln{{position:absolute;right:22mm;text-align:right;font-family:Hand;color:#000;
      line-height:1;white-space:nowrap}}
 </style></head><body><div class="board">
-  <div class="ln" style="top:73.76mm;font-size:26mm;transform:rotate(-0.9deg)">&#1504;&#1497;&#1510;&#1495;&#1493;&#1504;&#1493;&#1514;</div>
-  <div class="ln" style="top:100.16mm;font-size:26mm;transform:rotate(-0.35deg)">&#1511;&#1496;&#1504;&#1497;&#1501;</div>
-  <div class="ln" style="top:140.5mm;font-size:9.4mm;transform:rotate(-0.5deg)">&#1502;&#1505;&#1506; &#1489;&#1513;&#1500;&#1493;&#1513; &#1502;&#1506;&#1512;&#1499;&#1493;&#1514;</div>
-  <div class="ln" style="top:173.5mm;font-size:12mm;transform:rotate(-0.7deg)">&#1499;&#1512;&#1502;&#1500;&#1492; &#1490;&#1497;&#1504;&#1514;</div>
-  <svg style="position:absolute;top:132.5mm;right:22mm;width:74mm;height:9mm;overflow:visible"
-       viewBox="0 0 740 90" xmlns="http://www.w3.org/2000/svg">
+  <!-- קווי הסרגל של הפנקס: 34 מ"מ + k*8.73. הכתיבה יושבת *על* הקווים,
+       כמו יד אמיתית; קודם היא ריחפה וחצתה אותם בגבהים שרירותיים.
+       הכותרת הוגדלה כי במבחן התמונה הממוזערת היא לא החזיקה. -->
+  <div class="ln" style="top:40.1mm;right:24mm;font-size:31mm;transform:rotate(-0.9deg)">&#1504;&#1497;&#1510;&#1495;&#1493;&#1504;&#1493;&#1514;</div>
+  <div class="ln" style="top:75.0mm;right:24mm;font-size:31mm;transform:rotate(-0.35deg)">&#1511;&#1496;&#1504;&#1497;&#1501;</div>
+  <div class="ln" style="top:120.4mm;font-size:10.5mm;transform:rotate(-0.5deg)">&#1502;&#1505;&#1506; &#1489;&#1513;&#1500;&#1493;&#1513; &#1502;&#1506;&#1512;&#1499;&#1493;&#1514;</div>
+  <div class="ln" style="top:170.5mm;font-size:13mm;transform:rotate(-0.7deg)">&#1499;&#1512;&#1502;&#1500;&#1492; &#1490;&#1497;&#1504;&#1514;</div>
+  <svg style="position:absolute;top:110.5mm;right:24.5mm;width:80mm;height:9mm;overflow:visible"
+       viewBox="0 0 800 90" xmlns="http://www.w3.org/2000/svg">
     <g fill="none" stroke="#000" stroke-linecap="round">
-      <path d="M726 26 C560 16 300 34 96 22" stroke-width="7"/>
-      <path d="M706 52 C560 44 340 58 148 47" stroke-width="4.2" opacity=".8"/>
+      <path d="M786 26 C600 16 320 34 96 22" stroke-width="7"/>
+      <path d="M762 52 C600 44 360 58 150 47" stroke-width="4.2" opacity=".8"/>
     </g>
   </svg>
 </div></body></html>"""
