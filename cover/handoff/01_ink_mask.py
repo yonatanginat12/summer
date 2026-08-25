@@ -33,7 +33,7 @@ HTML = f"""<!DOCTYPE html><html lang="he" dir="rtl"><head><meta charset="utf-8">
        הוא שורה אחת ולא שתיים: 16 מ"מ, גובה אות ~8.8 מ"מ, רוחב ~70%
        מהחיתוך — בדיוק היחסים של הרפרנסים.
        קווי הסרגל: 34 + k*8.73. כל קו בסיס יושב על אחד מהם. -->
-  <div class="ln" style="top:44.0mm;right:22mm;font-size:17.5mm;transform:rotate(-0.55deg)">&#1504;&#1497;&#1510;&#1495;&#1493;&#1504;&#1493;&#1514; &#1511;&#1496;&#1504;&#1497;&#1501;</div>
+  <div class="ln" style="top:43.2mm;right:22mm;font-size:19mm;transform:rotate(-0.55deg)">&#1504;&#1497;&#1510;&#1495;&#1493;&#1504;&#1493;&#1514; &#1511;&#1496;&#1504;&#1497;&#1501;</div>
   <div class="ln" style="top:70.3mm;font-size:8mm;transform:rotate(-0.4deg)">&#1502;&#1505;&#1506; &#1489;&#1513;&#1500;&#1493;&#1513; &#1502;&#1506;&#1512;&#1499;&#1493;&#1514;</div>
   <div class="ln" style="top:95.1mm;font-size:9.5mm;transform:rotate(-0.6deg)">&#1499;&#1512;&#1502;&#1500;&#1492; &#1490;&#1497;&#1504;&#1514;</div>
   <svg style="position:absolute;top:63.4mm;right:24.5mm;width:92mm;height:5mm;overflow:visible"

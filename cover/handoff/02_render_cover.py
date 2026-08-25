@@ -420,13 +420,13 @@ img *= (1 - 0.62 * occl)[..., None]                       # צל מגע על ה�
 # החריצים מהדף שמעל נכנסים כאן, יחד עם שני שדות הגובה האחרים —
 # באור ולא בצבע. זה מה שהופך אותם מרפאים מטושטש לחריטה.
 lit = (shade(cockle, 14, 0.027) + shade(tooth, 0.0, 0.013)
-       + shade(deboss, 1.1, 0.0115))
+       + shade(deboss, 1.1, 0.0068))
 lam = 1.0 + soft(lit, 0.075)
 # האפלת סביבה על גיליון שטוח היא זניחה פיזיקלית: התבליט הוא כעשירית
 # מילימטר, ואין מה שיסתיר. בעוצמה גבוהה זה מצטבר לכתמי לכלוך.
 ao = 1 - np.clip(ndimage.gaussian_filter(cockle, 45) - cockle, 0, None) * 0.35
 mao = 1 - np.clip(-ndimage.gaussian_filter(tooth, 1.6), 0, None) * 0.014
-mao *= 1 - np.clip(-deboss, 0, None) * 0.020              # שקע אוסף פחות אור
+mao *= 1 - np.clip(-deboss, 0, None) * 0.012              # שקע אוסף פחות אור
 img *= (lam * np.clip(ao, 0.988, 1.0) * mao)[..., None] * page[..., None] \
        + (1 - page)[..., None]
 
@@ -469,8 +469,10 @@ img = np.clip(img, 0, 1)
 out = Image.fromarray((img ** (1 / 1.015) * 255).astype(np.uint8))
 out = out.filter(ImageFilter.UnsharpMask(radius=1.0, percent=17, threshold=3))
 
-bleed_path = "final_bleed.png"
-out.save(bleed_path)
+# PNG בלי מקטע pHYs נפתח כ-72dpi, וכל תוכנת עימוד תניח אותו בפי
+# ארבעה מהגודל. חייב להיות כתוב בקובץ.
+DPI = (300, 300)
+out.save("final_bleed.png", dpi=DPI)
 m = round(3 * 300 / 25.4)
-out.crop((m, m, W - m, H - m)).save("final_trim.png")
+out.crop((m, m, W - m, H - m)).save("final_trim.png", dpi=DPI)
 print("done", out.size)
