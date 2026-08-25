@@ -354,32 +354,76 @@ alpha = np.clip(ink * 1.12, 0, 1)
 img = paper * (1 - alpha[..., None]) + ink_rgb * alpha[..., None]
 
 # ------------------------------------------------------- 9. טבעת קפה
-# הקו שנשאר הוא *קו המגע*: האידוי סוחב מוצקים אל השפה החיצונית, ולכן
-# מחוץ לטבעת החתך חד ובפנים הוא נמשך פנימה בהדרגה.
+# קו המגע לא נסוג בהחלקה — הוא נסוג ב*קפיצות*. הוא נתקע, הנוזל מתאדה
+# ומשקיע רצועת מוצקים, ואז המניסקוס קורע ונתקע שוב פנימה. לכן מה
+# שנשאר הוא **סרט בעל שתי שפות חדות** שרוחבו קופץ סביב ההיקף, ולא
+# מדרון גאוסיאני. ופנים הטבעת נשאר **נקי**: כל המוצקים נסחבו אל השפה.
+#
+# נמדד מהרפרנס בחתך רדיאלי: ליבת הרצועה מורידה (1,5,22) רמות — כמעט
+# *רק כחול*. כלומר קפה על נייר קנרי מעמיק את הצהוב ולא מאפיר אותו.
+# הגרסה הקודמת הורידה (14,37,61), גם פי שלושה חזק מדי וגם בכיוון
+# שמאפיר — ומכאן שהיא נקראה כלכלוך ולא כקפה.
 cy, cx = 158.0 * PXMM, 33.0 * PXMM
-r = np.hypot(Y - cy, (X - cx) * 1.07)
-R = 17.0 * PXMM
-# הכוס לא עומדת ישר ולא עגולה לגמרי
-wobr = ndimage.gaussian_filter(rng.standard_normal((H, W)).astype(np.float32), 60) * 120
-rr = r + wobr - R
-# רוחב קו המגע משתנה סביב ההיקף: היכן שהמניסקוס נסוג מהר הוא דק,
-# והיכן שהוא נתקע הוא עבה. טבעת ברוחב אחיד נראית מצוירת בעיפרון.
-ang = np.arctan2(Y - cy, X - cx)
-wid = 0.38 + 0.55 * (0.5 + 0.5 * np.sin(ang * 3.0 + 0.7)) \
-           + 0.30 * (0.5 + 0.5 * np.sin(ang * 7.0 - 2.1))
-edge = np.clip(1 - rr / (0.42 * PXMM), 0, 1)              # חד בחוץ
-tail = np.clip(1 + rr / ((1.1 + 2.6 * wid) * PXMM), 0, 1) ** 2.0   # נמשך פנימה
-ring = np.minimum(edge, tail)
-# והטבעת נקטעת: היכן שהנוזל נסוג בבת אחת לא נשאר כלום
-ring *= np.clip(-0.10 + 1.9 * (0.5 + 0.5 * np.sin(ang * 2.0 - 1.2))
-                * (0.30 + 0.70 * noise((H, W), int(14 * PXMM), 2, .5)), 0, 1)
-ring *= 0.80 + 0.20 * unit(fib_md)                        # מכתים לאורך הסיב
-# מוצקים שנשארו על קו המגע — גרגירים, לא קו רצוף
-gritty = np.clip(fbm((H, W), 2, 0.6, 0.5) * 0.6 + 0.5, 0, 1)
-ring *= 0.55 + 0.85 * gritty
-inner = np.clip(1 - r / R, 0, 1) ** 0.6 * 0.075
-stain = np.clip(ring * 1.15 + inner, 0, 1)
-img -= stain[..., None] * np.array([0.055, 0.145, 0.240], np.float32)
+ECC = 1.035                                   # הספל לא עמד ישר לגמרי
+r = np.hypot(Y - cy, (X - cx) * ECC)
+ang = np.arctan2(Y - cy, (X - cx) * ECC)
+R = 21.0 * PXMM                               # ספל של ~42 מ"מ קוטר
+
+NB = 1440
+gi = (((ang + np.pi) / (2 * np.pi) * NB).astype(np.int32) % NB)
+
+
+def circn(sig):
+    """רעש מחזורי סביב ההיקף — בלי תפר ב-±pi."""
+    return norm(ndimage.gaussian_filter1d(
+        rng.random(NB).astype(np.float32), sig, mode="wrap"))
+
+
+def stepped(sig, n):
+    """פרופיל מדורג: כך נראית נסיגה בקפיצות, ולא שינוי חלק."""
+    return np.floor(circn(sig) * n) / max(n - 1, 1)
+
+
+def soft_steps(p, sig=6.0):
+    return ndimage.gaussian_filter1d(p.astype(np.float32), sig, mode="wrap")
+
+
+r_out = R * (1.0 + 0.018 * (circn(120) - 0.5) + 0.009 * (circn(34) - 0.5))
+w_mm = soft_steps(1.3 + 3.1 * stepped(46, 6), 7.0)   # רוחב הסרט: 1.3-4.4 מ"מ
+present = soft_steps((stepped(52, 5) > 0.12).astype(np.float32), 4.0)  # נקטע
+
+ro = r_out[gi]
+wpx = np.maximum(w_mm[gi] * PXMM, 2.0)
+ri = ro - wpx
+# שתי השפות חדות — זה כל ההבדל מול טבעת גאוסיאנית
+band = np.clip((ro - r) / 1.3, 0, 1) * np.clip((r - ri) / 1.3, 0, 1)
+band *= present[gi]
+# המוצקים נערמים אל השפה החיצונית, זו שנתקעה
+band *= 1.0 + 0.45 * np.clip((r - (ro - 0.35 * wpx)) / (0.35 * wpx), 0, 1)
+band *= 0.82 + 0.18 * unit(fib_md)            # נסחב לאורך הסיב
+band *= 0.86 + 0.20 * np.clip(fbm((H, W), 3, 1.6, 0.5) * 0.5 + 0.5, 0, 1)
+
+# טיפות תזזית לצד הטבעת. גם טיפה קטנה מייצרת קו מגע משלה, ולכן היא
+# כהה בשפה ובהירה במרכז.
+drops = np.zeros((H, W), np.float32)
+for _ in range(11):
+    a0 = rng.uniform(-np.pi, np.pi)
+    rad = R * rng.uniform(0.90, 1.18)
+    dy, dx = cy + np.sin(a0) * rad, cx + np.cos(a0) * rad / ECC
+    dr = rng.uniform(0.30, 1.4) * PXMM
+    y0, y1 = int(max(0, dy - 5 * dr)), int(min(H, dy + 5 * dr))
+    x0, x1 = int(max(0, dx - 5 * dr)), int(min(W, dx + 5 * dr))
+    if y1 - y0 < 3 or x1 - x0 < 3:
+        continue
+    dd = np.hypot(Y[y0:y1, x0:x1] - dy, X[y0:y1, x0:x1] - dx)
+    disc = np.clip((dr - dd) / 1.3, 0, 1) * 0.45
+    rim = np.clip(1 - np.abs(dd - dr * 0.80) / (0.26 * dr), 0, 1) * 0.75
+    drops[y0:y1, x0:x1] = np.maximum(drops[y0:y1, x0:x1], disc + rim)
+
+# פנים הטבעת נקי. דיסקה כהה בפנים הפכה את זה לבועה ולא לכתם.
+stain = np.clip(band * 0.85 + drops * 0.70, 0, 1)
+stain = warp(stain)          # על אותו משטח כמו כל שאר השכבות
+img -= stain[..., None] * np.array([0.024, 0.046, 0.108], np.float32)
 
 # --------------------------------- 10. שפת הקרע בראש הדף + המשטח שמתחת
 # מה שמעל הקרע איננו נייר: זה השולחן שהדף מונח עליו. זה מה שנותן
