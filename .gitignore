@@ -6,3 +6,7 @@ cover/handoff/refs/
 cover/handoff/*.npy
 cover/handoff/debossmask.html
 __pycache__/
+
+# generated print sheets — rebuild with variations/pdf.py
+cover/variations/covers-*.html
+cover/variations/.build/
